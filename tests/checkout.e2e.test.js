@@ -63,6 +63,8 @@ test('standard user can complete a two-product checkout', async (t) => {
     // 3. Open the cart; it should list exactly the two products
     await byTest(page, 'shopping-cart-link').click();
     await page.waitForURL(/cart\.html/);
+    // The URL changes before the cart is drawn, so wait for the cart's own title first.
+    await expectText(byTest(page, 'title'), 'Your Cart');
     const cartItems = byTest(page, 'inventory-item-name');
     for (const [i, product] of PRODUCTS.entries()) {
       await expectText(cartItems.nth(i), product.name);
@@ -89,10 +91,10 @@ test('standard user can complete a two-product checkout', async (t) => {
     await expectText(byTest(page, 'complete-header'), 'Thank you for your order!');
     await expectEmptyCart(page);
   } catch (error) {
-    // Save a screenshot of the page where the test failed.
-      await page.screenshot({ path: 'failure.png', fullPage: true })
-          .then(() => console.log('Screenshot saved: failure.png'))
-          .catch((e) => console.log('Could not save screenshot:', e.message));
-      throw error;
+    // Save a screenshot of the page where the test failed (in the project folder).
+    await page.screenshot({ path: 'failure.png', fullPage: true })
+      .then(() => console.log('Screenshot saved: failure.png'))
+      .catch((e) => console.log('Could not save screenshot:', e.message));
+    throw error;
   }
 });
